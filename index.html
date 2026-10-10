@@ -57,10 +57,10 @@ svg{display:block;width:100%;height:auto}
 svg text{fill:var(--ink);font-family:var(--f-body)}
 .axis{font-size:12px;fill:var(--muted)!important;text-transform:uppercase;letter-spacing:.06em}
 .dot,.node{cursor:pointer}
-.dot circle.b{fill:var(--ink);stroke-width:4}
+.dot .b{fill:var(--ink);stroke-width:4}
 .dot text{fill:var(--paper)!important;font:600 12px var(--f-mono);pointer-events:none}
-.dot.sel circle.b{stroke:var(--accent)!important}
-.dot.excl circle.b{fill:var(--sheet);stroke:var(--muted)!important;stroke-dasharray:4 3;stroke-width:2}
+.dot.sel .b{stroke:var(--accent)!important}
+.dot.excl .b{fill:var(--sheet);stroke:var(--muted)!important;stroke-dasharray:4 3;stroke-width:2}
 .dot.excl text{fill:var(--muted)!important}
 .lbl{font-size:13px;font-weight:600}
 .lbl.excl{fill:var(--muted)!important;font-weight:500}
@@ -68,11 +68,23 @@ svg text{fill:var(--ink);font-family:var(--f-body)}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-2px;margin-right:5px;border:3px solid currentColor}
 
 .edge{stroke:var(--ink);stroke-opacity:.45;fill:none;stroke-linecap:round}
-.edge.dim{stroke-opacity:.12}
+.edge.dim{stroke-opacity:.22}
 .edge.hot{stroke:var(--accent);stroke-opacity:1}
 .wt{font:600 12px var(--f-mono)}
 .wt-bg{fill:var(--sheet)}
-.wt.dim,.wt-bg.dim{opacity:.3}
+.wt.dim,.wt-bg.dim{opacity:.45}
+.band{stroke:none}
+.band.amp{fill:var(--accent-soft)}
+.band.haz{fill:var(--paper)}
+.bandlbl{font:700 11px var(--f-body);letter-spacing:.1em;fill:var(--muted)!important}
+.node rect,.node circle{stroke:var(--ink);stroke-width:2;fill:var(--ink)}
+.node.excl rect,.node.excl circle{fill:var(--sheet);stroke:var(--muted);stroke-dasharray:4 3}
+.node.sel rect,.node.sel circle{stroke:var(--accent);stroke-width:4}
+tr.grp td{background:var(--paper);font:700 .72rem var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--ink);padding:10px 8px 8px;border-bottom:1px solid var(--rule)}
+tr.grp td span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);margin-left:8px;font-size:.85rem}
+.dir{font-family:var(--f-mono);color:var(--muted)}
+.ln{display:block;padding-left:1.1em;text-indent:-1.1em}
+.tag.layer{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--accent)}
 .node circle{stroke:var(--ink);stroke-width:2;fill:var(--ink)}
 .node text.c{fill:var(--paper)!important;font:600 12px var(--f-mono)}
 .node.excl circle{fill:var(--sheet);stroke:var(--muted);stroke-dasharray:4 3}
@@ -80,9 +92,11 @@ svg text{fill:var(--ink);font-family:var(--f-body)}
 .node.dim{opacity:.3}
 .node.sel circle{stroke:var(--accent);stroke-width:4}
 .hubs{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:6px}
-.hubs li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 10px;font-size:.9rem;border-bottom:1px solid var(--rule);padding-bottom:5px}
+.hubs li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:0 10px;font-size:.9rem;border-bottom:1px solid var(--rule);padding-bottom:5px}
 .hubs b{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
 .hubs small{color:var(--muted);grid-column:1/-1}
+.hubs .in,.hubs .out{font:600 .85rem var(--f-mono);min-width:4.5em;text-align:right}
+.hubs .in{color:var(--accent)}
 
 .tablewrap{overflow-x:auto}
 table{border-collapse:collapse;width:100%;min-width:980px;font-size:.88rem}
@@ -110,9 +124,9 @@ dd ol,dd ul,td ol,td ul{margin:4px 0 0;padding-left:1.15em}
 dd li,td li{margin:2px 0}
 a{color:var(--accent)}
 .note{font-size:.78rem;color:var(--muted);border-top:1px solid var(--rule);padding-top:10px;margin:14px 0 0}
-@media (prefers-reduced-motion:no-preference){.dot circle,.node,.edge{transition:opacity .2s,stroke .2s,stroke-opacity .2s}}
+@media (prefers-reduced-motion:no-preference){.dot .b,.node,.edge{transition:opacity .2s,stroke .2s,stroke-opacity .2s}}
 </style>
-<style>html{color-scheme:light}body{margin:0;font-size:14px}[hidden]{display:none!important}</style>
+<style>body{margin:0;font-size:14px}[hidden]{display:none!important}</style>
 </head>
 <body>
 <div class="wrap">
@@ -139,7 +153,7 @@ a{color:var(--accent)}
   <div class="main wide" id="main">
     <section class="panel" id="view-table">
       <h2>Ranked register</h2>
-      <p class="hint">Click a row for its card. Switch to Full to see the original wording.</p>
+      <p class="hint">Click a row for its card. Interdependencies: → scored in this risk's row, ← scored in the other risk's row. Switch to Full for the original wording.</p>
       <div class="tablewrap"><table id="tbl"></table></div>
     </section>
 
@@ -152,15 +166,15 @@ a{color:var(--accent)}
         <span style="color:var(--ok)"><i></i>High</span>
         <span style="color:var(--warn)"><i></i>Medium / Moderate</span>
         <span style="color:var(--crit)"><i></i>Low / Lacking</span>
-        <span>· Bubble size = speed of onset · Dashed = excluded</span>
+        <span>· Square = amplifier · Circle = hazard · Size = speed of onset · Dashed = excluded</span>
       </div>
     </section>
 
     <section class="panel" id="view-net" hidden>
       <h2>Interdependencies</h2>
-      <p class="hint">Links and scores come from the Interdependencies column. Line weight = score. Click a risk to isolate its links.</p>
+      <p class="hint">Scores from the Interdependencies column. Each arrow starts at the risk whose row gives the score. Line weight = score. Click a risk to isolate its links.</p>
       <svg id="net" viewBox="0 0 700 470" role="img" aria-label="Network of risk interdependencies"></svg>
-      <h2 style="margin-top:14px">Most connected</h2>
+      <h2 style="margin-top:14px">Score flowing in and out</h2>
       <ul class="hubs" id="hubs"></ul>
     </section>
 
@@ -293,13 +307,19 @@ const R = [
   plot:{l:1.5,s:2,range:[1.5,2.5],lab:"l"}, prep:"crit", fast:false}
 ];
 // Interdependencies column, as scored in the table.
+// Interdependencies column, directed: a = the risk whose row gives the score, b = the risk it names.
 const E = [
  {a:"ai",b:"ter",w:3},
  {a:"ai",b:"mis",w:5},
+ {a:"ter",b:"ai",w:2},
+ {a:"ter",b:"mis",w:4},
  {a:"cli",b:"mis",w:3},
  {a:"pan",b:"mis",w:5},
  {a:"pan",b:"cli",w:3,note:"e.g. increased risk of zoonotic spillovers"}
 ];
+const AMP=new Set(["mis","ai"]);
+R.forEach(r=>r.layer=AMP.has(r.id)?"amp":"haz");
+const LAYERS=[["amp","Amplifiers","carry and intensify other risks on platforms"],["haz","Hazards","events and trends that platforms are exposed to"]];
 const byId=Object.fromEntries(R.map(r=>[r.id,r]));
 const FIELDS=[["L","Likelihood"],["S","Severity"],["K","Knock-on effect"],["P","Preparedness"],["O","Speed of onset"],["H","Precedent"]];
 const prepVar={ok:"var(--ok)",warn:"var(--warn)",crit:"var(--crit)"};
@@ -322,8 +342,8 @@ function rated(r,f,inv){
 }
 
 function status(){
-  const inc=R.filter(r=>!r.excluded).length;
-  document.getElementById("status").innerHTML=`<div><b>${inc}</b><span>Risks in scope</span></div><div><b>${R.length-inc}</b><span>Excluded</span></div><div><b>${E.length}</b><span>Interdependencies</span></div>`;
+  const amp=R.filter(r=>r.layer==="amp").length, haz=R.filter(r=>r.layer==="haz"&&!r.excluded).length;
+  document.getElementById("status").innerHTML=`<div><b>${amp}</b><span>Amplifiers</span></div><div><b>${haz}</b><span>Hazards in scope</span></div><div><b>${R.filter(r=>r.excluded).length}</b><span>Excluded</span></div><div><b>${E.length}</b><span>Scored links</span></div>`;
 }
 
 function heat(){
@@ -341,7 +361,8 @@ function heat(){
     const p=r.plot,cx=px(p.l),cy=py(p.s),rad=r.fast?18:12;
     const g=el("g",{class:"dot"+(sel===r.id?" sel":"")+(r.excluded?" excl":""),tabindex:0,role:"button","aria-label":`${r.rank}. ${r.name}`},svg);
     if(p.range) el("line",{x1:cx,x2:cx,y1:py(p.range[0]),y2:py(p.range[1]),stroke:r.excluded?"var(--muted)":"var(--ink)","stroke-width":2,"stroke-linecap":"round"},g);
-    el("circle",{class:"b",cx,cy,r:rad,stroke:prepVar[r.prep]},g);
+    if(r.layer==="amp") el("rect",{class:"b",x:cx-rad,y:cy-rad,width:rad*2,height:rad*2,rx:6,stroke:prepVar[r.prep]},g);
+    else el("circle",{class:"b",cx,cy,r:rad,stroke:prepVar[r.prep]},g);
     el("text",{x:cx,y:cy+4,"text-anchor":"middle"},g).textContent=r.rank;
     const lab=p.lab, lx=lab==="r"?cx+rad+8:lab==="l"?cx-rad-8:cx, ly=lab==="b"?cy+rad+16:cy+5;
     el("text",{x:lx,y:ly,"text-anchor":lab==="r"?"start":lab==="l"?"end":"middle",class:"lbl"+(r.excluded?" excl":"")},svg).textContent=r.name;
@@ -349,55 +370,71 @@ function heat(){
   });
 }
 
+function flows(){const i={},o={};R.forEach(r=>{i[r.id]=0;o[r.id]=0});E.forEach(e=>{o[e.a]+=e.w;i[e.b]+=e.w});return {i,o};}
+
 function net(){
   const svg=document.getElementById("net");svg.innerHTML="";
-  const cx=350,cy=232,rr=165,pos={};
-  const order=["mis","ai","ter","sol","env","cli","pan"];
-  order.forEach((id,i)=>{const a=-Math.PI/2+i*2*Math.PI/order.length;pos[id]={x:cx+rr*Math.cos(a),y:cy+rr*Math.sin(a),a}});
-  const wsum={};R.forEach(r=>wsum[r.id]=0);E.forEach(e=>{wsum[e.a]+=e.w;wsum[e.b]+=e.w});
-  const rad=id=>15+wsum[id]*1.6;
-  const touch=e=>!sel||e.a===sel||e.b===sel;
+  const defs=el("defs",{},svg);
+  [["h","var(--accent)"],["d","var(--muted)"]].forEach(([k,c])=>{const m=el("marker",{id:"ar-"+k,viewBox:"0 0 10 10",refX:9,refY:5,markerWidth:13,markerHeight:13,markerUnits:"userSpaceOnUse",orient:"auto"},defs);el("path",{d:"M0 0L10 5L0 10z",fill:c},m)});
+  el("rect",{x:6,y:14,width:688,height:186,rx:12,class:"band amp"},svg);
+  el("rect",{x:6,y:232,width:688,height:228,rx:12,class:"band haz"},svg);
+  el("text",{x:22,y:38,class:"bandlbl"},svg).textContent="AMPLIFIERS";
+  el("text",{x:22,y:256,class:"bandlbl"},svg).textContent="HAZARDS";
+  const pos={mis:{x:250,y:118},ai:{x:470,y:118},cli:{x:95,y:350},pan:{x:225,y:350},ter:{x:365,y:350},sol:{x:488,y:350},env:{x:622,y:350}};
+  const {i:inS,o:outS}=flows();
+  const rad=id=>15+(inS[id]+outS[id])*1.1;
+  const pair=e=>E.some(f=>f.a===e.b&&f.b===e.a);
+  const touch=e=>e.a===sel||e.b===sel;
+  const labels=[];
   E.forEach(e=>{
-    const A=pos[e.a],B=pos[e.b],hot=touch(e);
-    el("line",{x1:A.x,y1:A.y,x2:B.x,y2:B.y,class:"edge"+(hot?" hot":" dim"),"stroke-width":e.w*1.6},svg);
+    const A=pos[e.a],B=pos[e.b],dx=B.x-A.x,dy=B.y-A.y,d=Math.hypot(dx,dy),nx=-dy/d,ny=dx/d,off=pair(e)?30:10;
+    const mx=(A.x+B.x)/2+nx*off,my=(A.y+B.y)/2+ny*off;
+    const sA=Math.hypot(mx-A.x,my-A.y),sB=Math.hypot(mx-B.x,my-B.y);
+    const x1=A.x+(mx-A.x)/sA*(rad(e.a)+2),y1=A.y+(my-A.y)/sA*(rad(e.a)+2);
+    const x2=B.x+(mx-B.x)/sB*(rad(e.b)+3),y2=B.y+(my-B.y)/sB*(rad(e.b)+3);
+    const hot=touch(e);
+    el("path",{d:`M${x1} ${y1}Q${mx} ${my} ${x2} ${y2}`,class:"edge"+(hot?" hot":" dim"),"stroke-width":1+e.w*1.1,"marker-end":`url(#ar-${hot?"h":"d"})`},svg);
+    labels.push({x:.25*x1+.5*mx+.25*x2,y:.25*y1+.5*my+.25*y2,w:e.w,hot});
   });
-  E.forEach(e=>{
-    const A=pos[e.a],B=pos[e.b],mx=(A.x+B.x)/2,my=(A.y+B.y)/2,d=touch(e)?"":" dim";
-    el("circle",{cx:mx,cy:my,r:11,class:"wt-bg"+d,stroke:touch(e)?"var(--accent)":"var(--rule)"},svg);
-    el("text",{x:mx,y:my+4,"text-anchor":"middle",class:"wt"+d},svg).textContent=e.w;
-  });
+  labels.forEach(l=>{const d=l.hot?"":" dim";
+    el("circle",{cx:l.x,cy:l.y,r:11,class:"wt-bg"+d,stroke:l.hot?"var(--accent)":"var(--rule)"},svg);
+    el("text",{x:l.x,y:l.y+4,"text-anchor":"middle",class:"wt"+d},svg).textContent=l.w;});
   const near=new Set([sel]);E.filter(touch).forEach(e=>{near.add(e.a);near.add(e.b)});
-  order.forEach(id=>{
-    const r=byId[id],p=pos[id];
+  R.forEach(r=>{const id=r.id,p=pos[id],rr=rad(id);
     const g=el("g",{class:"node"+(r.excluded?" excl":"")+(sel===id?" sel":"")+(near.has(id)?"":" dim"),tabindex:0,role:"button","aria-label":r.name},svg);
-    el("circle",{cx:p.x,cy:p.y,r:rad(id)},g);
+    if(r.layer==="amp") el("rect",{x:p.x-rr,y:p.y-rr,width:rr*2,height:rr*2,rx:10},g); else el("circle",{cx:p.x,cy:p.y,r:rr},g);
     el("text",{x:p.x,y:p.y+4,"text-anchor":"middle",class:"c"},g).textContent=r.rank;
-    const R2=rad(id)+12, side=Math.abs(Math.cos(p.a))<.3;
-    const lx=p.x+Math.cos(p.a)*R2, ly=p.y+Math.sin(p.a)*R2+(side?Math.sign(Math.sin(p.a))*8:5);
-    el("text",{x:lx,y:ly,"text-anchor":side?"middle":Math.cos(p.a)>0?"start":"end",class:"lbl"+(r.excluded?" excl":"")},g).textContent=r.name;
+    const ly=r.layer==="amp"?p.y-rr-10:p.y+rr+20;
+    el("text",{x:p.x,y:ly,"text-anchor":"middle",class:"lbl"+(r.excluded?" excl":"")},g).textContent=r.name;
     g.onclick=()=>pick(id);g.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick(id)}};
   });
-  const deg={};R.forEach(r=>deg[r.id]=0);E.forEach(e=>{deg[e.a]++;deg[e.b]++});
-  document.getElementById("hubs").innerHTML=R.filter(r=>wsum[r.id]>0).sort((a,b)=>wsum[b.id]-wsum[a.id]||a.rank-b.rank)
-    .map(r=>`<li><span>${r.name}</span><b>${wsum[r.id]}</b><small>${deg[r.id]} link${deg[r.id]>1?"s":""} · combined score</small></li>`).join("");
+  document.getElementById("hubs").innerHTML=R.filter(r=>inS[r.id]+outS[r.id]>0).sort((a,b)=>(inS[b.id]+outS[b.id])-(inS[a.id]+outS[a.id])||a.rank-b.rank)
+    .map(r=>`<li><span>${r.name}</span><span class="in">in ${inS[r.id]}</span><span class="out">out ${outS[r.id]}</span><small>${r.layer==="amp"?"Amplifier":"Hazard"}</small></li>`).join("");
+}
+
+function linkLines(r,withNote){
+  const out=E.filter(e=>e.a===r.id).map(e=>`<span class="ln"><span class="dir">→</span> ${byId[e.b].name} <b class="mono">${e.w}</b>${withNote&&e.note?` <span style="color:var(--muted)">(${e.note})</span>`:""}</span>`);
+  const inn=E.filter(e=>e.b===r.id).map(e=>`<span class="ln"><span class="dir">←</span> ${byId[e.a].name} <b class="mono">${e.w}</b>${withNote&&e.note?` <span style="color:var(--muted)">(${e.note})</span>`:""}</span>`);
+  return out.concat(inn);
 }
 
 function table(){
   const t=document.getElementById("tbl");
   const cell=(r,f,inv)=>{const v=rated(r,f,inv);return v?`<td>${v}</td>`:`<td class="empty">—</td>`};
-  const links=r=>{const ls=E.filter(e=>e.a===r.id||e.b===r.id);return ls.length?ls.map(e=>`${byId[e.a===r.id?e.b:e.a].name} <b class="mono">${e.w}</b>`).join("<br>"):"—"};
+  const links=r=>{const l=linkLines(r,false);return l.length?l.join(""):"—"};
+  const row=r=>`<tr class="r${sel===r.id?" sel":""}${r.excluded?" excl":""}" data-id="${r.id}" tabindex="0"><td class="rank">${r.rank}</td><td><b>${r.name}</b>${r.excluded?'<br><span class="lvl na">Excluded</span>':""}</td>${FIELDS.map(f=>cell(r,f[0],f[0]==="P")).join("")}<td>${links(r)}</td></tr>`;
   t.innerHTML=`<thead><tr><th>Rank</th><th>Risk</th>${FIELDS.map(f=>`<th>${f[1]}</th>`).join("")}<th>Inter&shy;dependencies</th></tr></thead><tbody>`+
-   R.map(r=>`<tr class="r${sel===r.id?" sel":""}${r.excluded?" excl":""}" data-id="${r.id}" tabindex="0"><td class="rank">${r.rank}</td><td><b>${r.name}</b>${r.excluded?'<br><span class="lvl na">Excluded</span>':""}</td>${FIELDS.map(f=>cell(r,f[0],f[0]==="P")).join("")}<td>${links(r)}</td></tr>`).join("")+"</tbody>";
+   LAYERS.map(([k,lab,def])=>`<tr class="grp"><td colspan="${FIELDS.length+3}">${lab}<span>${def}</span></td></tr>`+R.filter(r=>r.layer===k).sort((a,b)=>a.rank-b.rank).map(row).join("")).join("")+"</tbody>";
   t.querySelectorAll("tr.r").forEach(tr=>{const go=()=>{pick(tr.dataset.id);document.getElementById("main").classList.remove("wide")};tr.onclick=go;tr.onkeydown=e=>{if(e.key==="Enter")go()}});
 }
 
 function detail(){
   const r=byId[sel],d=document.getElementById("detail");
-  const ls=E.filter(e=>e.a===r.id||e.b===r.id);
-  d.innerHTML=`<div class="tags"><span class="tag rank">Rank ${r.rank}</span>${r.excluded?'<span class="tag">Excluded</span>':""}</div>
+  const l=linkLines(r,true);
+  d.innerHTML=`<div class="tags"><span class="tag rank">Rank ${r.rank}</span><span class="tag layer">${r.layer==="amp"?"Amplifier":"Hazard"}</span>${r.excluded?'<span class="tag">Excluded</span>':""}</div>
    <h2>${r.name}</h2>
    <dl>${FIELDS.map(f=>{const v=rated(r,f[0],f[0]==="P");return `<div><dt>${f[1]}</dt>${v?`<dd>${v}</dd>`:`<dd class="empty">Not filled in</dd>`}</div>`}).join("")}
-   <div><dt>Interdependencies</dt>${ls.length?`<dd>${ls.map(e=>`${byId[e.a===r.id?e.b:e.a].name}: <b>${e.w}</b>${e.note?` <span style="color:var(--muted)">(${e.note})</span>`:""}`).join("<br>")}</dd>`:'<dd class="empty">None scored</dd>'}</div></dl>
+   <div><dt>Interdependencies</dt>${l.length?`<dd>${l.join("")}</dd>`:'<dd class="empty">None scored</dd>'}</div></dl>
    ${mode==="plain"?'<p class="note">Slide wording is trimmed from the full table. Switch to Full for the original text.</p>':""}`;
 }
 
