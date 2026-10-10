@@ -84,6 +84,11 @@ tr.grp td{background:var(--paper);font:700 .72rem var(--f-body);text-transform:u
 tr.grp td span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);margin-left:8px;font-size:.85rem}
 .dir{font-family:var(--f-mono);color:var(--muted)}
 .ln{display:block;padding-left:1.1em;text-indent:-1.1em}
+#tbl .ln{white-space:nowrap}
+.tfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.tfoot button{font:600 .85rem var(--f-body);border:1px solid var(--ink);background:var(--sheet);color:var(--ink);padding:7px 14px;border-radius:2px;cursor:pointer}
+.tfoot button:hover{background:var(--ink);color:var(--paper)}
+.tfoot .key{font-size:.78rem;color:var(--muted)}
 .tag.layer{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--accent)}
 .node circle{stroke:var(--ink);stroke-width:2;fill:var(--ink)}
 .node text.c{fill:var(--paper)!important;font:600 12px var(--f-mono)}
@@ -108,7 +113,7 @@ tr.r:hover td,tr.r.sel td{background:var(--accent-soft)}
 tr.r.excl td{color:var(--muted)}
 td.empty{color:var(--muted)}
 .mono{font-family:var(--f-mono)}
-.lvl{display:inline-block;font:600 .72rem var(--f-mono);text-transform:uppercase;letter-spacing:.03em;padding:1px 6px;border-radius:2px;margin-bottom:3px;border:1px solid currentColor}
+.lvl{display:inline-block;white-space:nowrap;font:600 .72rem var(--f-mono);text-transform:uppercase;letter-spacing:.03em;padding:1px 6px;border-radius:2px;margin-bottom:3px;border:1px solid currentColor}
 .lvl.hi{color:var(--crit)} .lvl.md{color:var(--warn)} .lvl.lo{color:var(--ok)} .lvl.na{color:var(--muted)}
 .lvl.inv.hi{color:var(--ok)} .lvl.inv.lo{color:var(--crit)}
 
@@ -153,27 +158,26 @@ a{color:var(--accent)}
   <div class="main wide" id="main">
     <section class="panel" id="view-table">
       <h2>Ranked register</h2>
-      <p class="hint">Click a row for its card. Interdependencies: → scored in this risk's row, ← scored in the other risk's row. Switch to Full for the original wording.</p>
       <div class="tablewrap"><table id="tbl"></table></div>
+      <div class="tfoot"><button id="more" type="button" aria-expanded="false">Show all 7 risks</button><span class="key">→ scored in this risk's row · ← scored in the other risk's row</span></div>
     </section>
 
     <section class="panel" id="view-map" hidden>
       <h2>Likelihood × Severity</h2>
-      <p class="hint">Click a risk to open its card. Vertical bars show a stated range. Number = rank.</p>
       <svg id="heat" viewBox="0 0 600 460" role="img" aria-label="Heat map of risks by likelihood and severity"></svg>
       <div class="legend">
         <span>Ring = preparedness:</span>
         <span style="color:var(--ok)"><i></i>High</span>
         <span style="color:var(--warn)"><i></i>Medium / Moderate</span>
         <span style="color:var(--crit)"><i></i>Low / Lacking</span>
-        <span>· Square = amplifier · Circle = hazard · Size = speed of onset · Dashed = excluded</span>
+        <span>· Number = rank · Square = amplifier · Circle = hazard · Size = speed of onset · Bar = stated range · Dashed = excluded</span>
       </div>
     </section>
 
     <section class="panel" id="view-net" hidden>
       <h2>Interdependencies</h2>
-      <p class="hint">Scores from the Interdependencies column. Each arrow starts at the risk whose row gives the score. Line weight = score. Click a risk to isolate its links.</p>
       <svg id="net" viewBox="0 0 700 470" role="img" aria-label="Network of risk interdependencies"></svg>
+      <div class="legend"><span>Arrow starts at the risk whose row gives the score · Line weight = score</span></div>
       <h2 style="margin-top:14px">Score flowing in and out</h2>
       <ul class="hubs" id="hubs"></ul>
     </section>
@@ -317,13 +321,14 @@ const E = [
  {a:"pan",b:"mis",w:5},
  {a:"pan",b:"cli",w:3,note:"e.g. increased risk of zoonotic spillovers"}
 ];
+const SHORT={'mis': {'K': 'Climate risk', 'H': null}, 'ai': {'K': 'Democracy, harmful content, civil liberties', 'H': 'Ongoing'}, 'ter': {'K': 'Offline attacks; social instability', 'H': 'Frequent'}, 'pan': {'K': 'Social, political and health systems', 'H': 'Once (COVID-19)'}, 'cli': {'K': 'Public understanding; misinformation', 'H': 'Ongoing'}, 'sol': {'K': 'Communications, economy, infrastructure', 'H': 'Rare'}, 'env': {'K': 'Food, migration, public disorder', 'H': 'Ongoing'}};
 const AMP=new Set(["mis","ai"]);
 R.forEach(r=>r.layer=AMP.has(r.id)?"amp":"haz");
 const LAYERS=[["amp","Amplifiers","carry and intensify other risks on platforms"],["haz","Hazards","events and trends that platforms are exposed to"]];
 const byId=Object.fromEntries(R.map(r=>[r.id,r]));
 const FIELDS=[["L","Likelihood"],["S","Severity"],["K","Knock-on effect"],["P","Preparedness"],["O","Speed of onset"],["H","Precedent"]];
 const prepVar={ok:"var(--ok)",warn:"var(--warn)",crit:"var(--crit)"};
-let sel="mis", mode="plain";
+let sel="mis", mode="plain", showAll=false;
 const NS="http://www.w3.org/2000/svg";
 const el=(t,a={},p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
 const txt=(r,f)=>r[mode][f];
@@ -412,20 +417,28 @@ function net(){
     .map(r=>`<li><span>${r.name}</span><span class="in">in ${inS[r.id]}</span><span class="out">out ${outS[r.id]}</span><small>${r.layer==="amp"?"Amplifier":"Hazard"}</small></li>`).join("");
 }
 
-function linkLines(r,withNote){
-  const out=E.filter(e=>e.a===r.id).map(e=>`<span class="ln"><span class="dir">→</span> ${byId[e.b].name} <b class="mono">${e.w}</b>${withNote&&e.note?` <span style="color:var(--muted)">(${e.note})</span>`:""}</span>`);
-  const inn=E.filter(e=>e.b===r.id).map(e=>`<span class="ln"><span class="dir">←</span> ${byId[e.a].name} <b class="mono">${e.w}</b>${withNote&&e.note?` <span style="color:var(--muted)">(${e.note})</span>`:""}</span>`);
+function linkLines(r,withNote,short){
+  const nm=id=>short&&id==="mis"?"Mis/disinformation":byId[id].name;
+  const out=E.filter(e=>e.a===r.id).map(e=>`<span class="ln"><span class="dir">→</span> ${nm(e.b)} <b class="mono">${e.w}</b>${withNote&&e.note?` <span style="color:var(--muted)">(${e.note})</span>`:""}</span>`);
+  const inn=E.filter(e=>e.b===r.id).map(e=>`<span class="ln"><span class="dir">←</span> ${nm(e.a)} <b class="mono">${e.w}</b>${withNote&&e.note?` <span style="color:var(--muted)">(${e.note})</span>`:""}</span>`);
   return out.concat(inn);
 }
 
 function table(){
   const t=document.getElementById("tbl");
-  const cell=(r,f,inv)=>{const v=rated(r,f,inv);return v?`<td>${v}</td>`:`<td class="empty">—</td>`};
-  const links=r=>{const l=linkLines(r,false);return l.length?l.join(""):"—"};
+  const cell=(r,f,inv)=>{
+    if(mode==="plain"){
+      if(f==="K"||f==="H"){const v=SHORT[r.id]&&SHORT[r.id][f]; return v?`<td>${v}</td>`:`<td class="empty">—</td>`;}
+      return r.lv[f]?`<td><span class="${lvlClass(r.lv[f],inv)}">${r.lv[f]}</span></td>`:`<td class="empty">—</td>`;
+    }
+    const v=rated(r,f,inv);return v?`<td>${v}</td>`:`<td class="empty">—</td>`};
+  const links=r=>{const l=linkLines(r,false,true);return l.length?l.join(""):"—"};
   const row=r=>`<tr class="r${sel===r.id?" sel":""}${r.excluded?" excl":""}" data-id="${r.id}" tabindex="0"><td class="rank">${r.rank}</td><td><b>${r.name}</b>${r.excluded?'<br><span class="lvl na">Excluded</span>':""}</td>${FIELDS.map(f=>cell(r,f[0],f[0]==="P")).join("")}<td>${links(r)}</td></tr>`;
+  const vis=r=>showAll||r.rank<=3;
   t.innerHTML=`<thead><tr><th>Rank</th><th>Risk</th>${FIELDS.map(f=>`<th>${f[1]}</th>`).join("")}<th>Inter&shy;dependencies</th></tr></thead><tbody>`+
-   LAYERS.map(([k,lab,def])=>`<tr class="grp"><td colspan="${FIELDS.length+3}">${lab}<span>${def}</span></td></tr>`+R.filter(r=>r.layer===k).sort((a,b)=>a.rank-b.rank).map(row).join("")).join("")+"</tbody>";
+   LAYERS.map(([k,lab,def])=>{const rs=R.filter(r=>r.layer===k&&vis(r)).sort((a,b)=>a.rank-b.rank);return rs.length?`<tr class="grp"><td colspan="${FIELDS.length+3}">${lab}<span>${def}</span></td></tr>`+rs.map(row).join(""):""}).join("")+"</tbody>";
   t.querySelectorAll("tr.r").forEach(tr=>{const go=()=>{pick(tr.dataset.id);document.getElementById("main").classList.remove("wide")};tr.onclick=go;tr.onkeydown=e=>{if(e.key==="Enter")go()}});
+  const b=document.getElementById("more");b.textContent=showAll?"Show top 3 only":`Show all ${R.length} risks`;b.setAttribute("aria-expanded",showAll);
 }
 
 function detail(){
@@ -447,6 +460,7 @@ document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
   document.getElementById("main").classList.toggle("wide",view==="table");
 });
 const setMode=m=>{mode=m;document.getElementById("w-plain").setAttribute("aria-pressed",m==="plain");document.getElementById("w-full").setAttribute("aria-pressed",m==="full");render()};
+document.getElementById("more").onclick=()=>{showAll=!showAll;table()};
 document.getElementById("w-plain").onclick=()=>setMode("plain");
 document.getElementById("w-full").onclick=()=>setMode("full");
 status();render();
