@@ -9,24 +9,15 @@
 <style>
 /* Layout: briefing-room console — header strip, view tabs, one large instrument (map / network / register), detail sheet beside it */
 :root{
-  --paper:#F2F4F7; --sheet:#FFFFFF; --ink:#15212C; --muted:#5B6773; --rule:#D5DBE2;
+  --paper:#FFFFFF; --sheet:#FFFFFF; --tint:#F3F5F8; --ink:#15212C; --muted:#5B6773; --rule:#D5DBE2;
   --accent:#2C4FB8; --accent-soft:#E3E9F8;
   --z-low:#E4EEEA; --z-med:#F7EBD2; --z-high:#F6DAD6;
   --ok:#2E7D5B; --warn:#B7791F; --crit:#B23A2E;
   --f-display:"Archivo","Arial Narrow",Arial,sans-serif;
   --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --paper:#0F151B; --sheet:#17202A; --ink:#E6EBF0; --muted:#97A3AF; --rule:#2A3642;
-  --accent:#8FA8F0; --accent-soft:#1F2C4A;
-  --z-low:#16302A; --z-med:#3A2F17; --z-high:#43211E;
-  --ok:#5CC495; --warn:#E3A848; --crit:#EF7A6C; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --paper:#0F151B; --sheet:#17202A; --ink:#E6EBF0; --muted:#97A3AF; --rule:#2A3642;
-  --accent:#8FA8F0; --accent-soft:#1F2C4A;
-  --z-low:#16302A; --z-med:#3A2F17; --z-high:#43211E;
-  --ok:#5CC495; --warn:#E3A848; --crit:#EF7A6C; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
@@ -75,12 +66,12 @@ svg text{fill:var(--ink);font-family:var(--f-body)}
 .wt.dim,.wt-bg.dim{opacity:.45}
 .band{stroke:none}
 .band.amp{fill:var(--accent-soft)}
-.band.haz{fill:var(--paper)}
+.band.haz{fill:var(--tint)}
 .bandlbl{font:700 11px var(--f-body);letter-spacing:.1em;fill:var(--muted)!important}
 .node rect,.node circle{stroke:var(--ink);stroke-width:2;fill:var(--ink)}
 .node.excl rect,.node.excl circle{fill:var(--sheet);stroke:var(--muted);stroke-dasharray:4 3}
 .node.sel rect,.node.sel circle{stroke:var(--accent);stroke-width:4}
-tr.grp td{background:var(--paper);font:700 .72rem var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--ink);padding:10px 8px 8px;border-bottom:1px solid var(--rule)}
+tr.grp td{background:var(--tint);font:700 .72rem var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--ink);padding:10px 8px 8px;border-bottom:1px solid var(--rule)}
 tr.grp td span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);margin-left:8px;font-size:.85rem}
 .dir{font-family:var(--f-mono);color:var(--muted)}
 .ln{display:block;padding-left:1.1em;text-indent:-1.1em}
