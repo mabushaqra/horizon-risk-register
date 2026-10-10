@@ -441,14 +441,21 @@ function table(){
   const b=document.getElementById("more");b.textContent=showAll?"Show top 3 only":`Show all ${R.length} risks`;b.setAttribute("aria-expanded",showAll);
 }
 
+// Slide mode: rating chip only; knock-on and precedent as short summaries. Full mode: original wording.
+function cardVal(r,f){
+  const inv=f==="P";
+  if(mode!=="plain") return rated(r,f,inv);
+  if(f==="K"||f==="H") return (SHORT[r.id]&&SHORT[r.id][f])||"";
+  return r.lv[f]?`<span class="${lvlClass(r.lv[f],inv)}">${r.lv[f]}</span>`:"";
+}
 function detail(){
   const r=byId[sel],d=document.getElementById("detail");
   const l=linkLines(r,true);
   d.innerHTML=`<div class="tags"><span class="tag rank">Rank ${r.rank}</span><span class="tag layer">${r.layer==="amp"?"Amplifier":"Hazard"}</span>${r.excluded?'<span class="tag">Excluded</span>':""}</div>
    <h2>${r.name}</h2>
-   <dl>${FIELDS.map(f=>{const v=rated(r,f[0],f[0]==="P");return `<div><dt>${f[1]}</dt>${v?`<dd>${v}</dd>`:`<dd class="empty">Not filled in</dd>`}</div>`}).join("")}
+   <dl>${FIELDS.map(f=>{const v=cardVal(r,f[0]);return `<div><dt>${f[1]}</dt>${v?`<dd>${v}</dd>`:`<dd class="empty">Not filled in</dd>`}</div>`}).join("")}
    <div><dt>Interdependencies</dt>${l.length?`<dd>${l.join("")}</dd>`:'<dd class="empty">None scored</dd>'}</div></dl>
-   ${mode==="plain"?'<p class="note">Slide wording is trimmed from the full table. Switch to Full for the original text.</p>':""}`;
+   ${mode==="plain"?'<p class="note">Switch to Full for the original wording.</p>':""}`;
 }
 
 function pick(id){sel=id;render()}
