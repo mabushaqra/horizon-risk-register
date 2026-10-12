@@ -150,7 +150,7 @@ a{color:var(--accent)}
     <section class="panel" id="view-table">
       <h2>Ranked register</h2>
       <div class="tablewrap"><table id="tbl"></table></div>
-      <div class="tfoot"><button id="more" type="button" aria-expanded="false">Show all 7 risks</button><span class="key">→ scored in this risk's row · ← scored in the other risk's row</span></div>
+      <div class="tfoot"><button id="more" type="button" aria-expanded="false">Show all 7 risks</button></div>
     </section>
 
     <section class="panel" id="view-map" hidden>
@@ -347,7 +347,8 @@ function table(){
       return r.lv[f]?`<td><span class="${lvlClass(r.lv[f],inv)}">${r.lv[f]}</span></td>`:`<td class="empty">—</td>`;
     }
     const v=rated(r,f,inv);return v?`<td>${v}</td>`:`<td class="empty">—</td>`};
-  const links=r=>{const l=linkLines(r,false,true);return l.length?l.join(""):"—"};
+  const links=r=>{const ps=[];E.forEach(e=>{const o=e.a===r.id?e.b:e.b===r.id?e.a:null;if(o&&!ps.includes(o))ps.push(o)});
+    return ps.length?ps.map(o=>`<span class="ln">${o==="mis"?"Mis/disinformation":byId[o].name}</span>`).join(""):"—"};
   const row=r=>`<tr class="r${sel===r.id?" sel":""}${r.excluded?" excl":""}" data-id="${r.id}" tabindex="0"><td class="rank">${r.rank}</td><td><b>${r.name}</b>${r.excluded?'<br><span class="lvl na">Excluded</span>':""}</td>${FIELDS.map(f=>cell(r,f[0],f[0]==="P")).join("")}<td>${links(r)}</td></tr>`;
   const vis=r=>showAll||r.rank<=3;
   t.innerHTML=`<thead><tr><th>Rank</th><th>Risk</th>${FIELDS.map(f=>`<th>${f[1]}</th>`).join("")}<th>Inter&shy;dependencies</th></tr></thead><tbody>`+
