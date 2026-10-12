@@ -74,7 +74,7 @@ svg text{fill:var(--ink);font-family:var(--f-body)}
 tr.grp td{background:var(--tint);font:700 .72rem var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--ink);padding:10px 8px 8px;border-bottom:1px solid var(--rule)}
 tr.grp td span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);margin-left:8px;font-size:.85rem}
 .dir{font-family:var(--f-mono);color:var(--muted)}
-.ln{display:block;padding-left:1.1em;text-indent:-1.1em}
+.ln{display:block}
 #tbl .ln{white-space:nowrap}
 .tfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
 .tfoot button{font:600 .85rem var(--f-body);border:1px solid var(--ink);background:var(--sheet);color:var(--ink);padding:7px 14px;border-radius:2px;cursor:pointer}
@@ -178,141 +178,61 @@ a{color:var(--accent)}
 </div>
 
 <script>
+const ul=xs=>"<ul>"+xs.map(x=>"<li>"+x+"</li>").join("")+"</ul>";
+const mk=(o)=>Object.assign(o,{plain:o.full});
 const R = [
- {id:"mis", name:"Mis/disinformation/FIMI", rank:1,
-  lv:{L:"Almost certain",S:"Mod–High",P:"Moderate",O:"Very high"},
-  plain:{
-   L:"Almost certain",
-   S:"Moderate–high; higher at flashpoints such as elections",
-   K:"Spills into climate risk when the content is about climate",
-   P:"Moderate: NCSC has frameworks to counter FIMI; the expanded DCMS remit should add resources",
-   O:"Very high: Russian troll farms react in real time (e.g. Southport, Liverpool)"},
-  full:{
-   L:"Almost certain",
-   S:"Moderate-High (Risk is higher at flashpoints ie elections)",
-   K:"(CG: knock-on effect to climate risk when mis/disinformation is about climate)",
-   P:"Moderate - NCSC has experience and frameworks to counter FIMI but with the remit expanded to DCMS should bring more resources to the issue.",
-   O:"Very high - for example, Russian ‘troll farms’ are efficient at responding at speed to real-time events such as Southport or Liverpool."},
-  plot:{l:3.5,s:2,range:[1.5,2.5],lab:"b"}, prep:"warn", fast:true},
-
- {id:"ai", name:"AI", rank:2,
+ mk({id:"mis", name:"Mis/disinformation/FIMI", rank:1,
+  lv:{L:"Almost certain",S:"Mod–High",K:"High",P:"Moderate",O:"Very high"},
+  full:{L:"Almost certain", S:"Moderate-High", K:"High-<br>climate risk<br>terrorist propaganda", P:"Moderate", O:"Very high", H:"ongoing"},
+  plot:{l:3.5,s:2,range:[1.5,2.5],lab:"b"}, prep:"warn", fast:true}),
+ mk({id:"ai", name:"AI", rank:2,
   lv:{L:"High",S:"High",K:"High",P:"Low",O:"High"},
-  plain:{
-   L:"High",
-   S:"Three core risks:<ul><li>AI-driven manipulation</li><li>Bypassing platform safeguards</li><li>Mass profiling and surveillance of beliefs and political activity</li></ul>",
-   K:"<ul><li>Disinformation that undermines democracy</li><li>More exposure to harmful content, including for minors</li><li>Erosion of civil liberties</li></ul>",
-   P:"Low",
-   O:"AI capability is advancing fast",
-   H:"Ongoing:<ul><li>Storm-1516: Russian state-backed AI disinformation</li><li>Grok: mass non-consensual sexualised images on X</li><li>Alleged DHS/ICE AI surveillance of social media</li></ul>"},
-  full:{
-   L:"High",
-   S:"High - three core risks:<ul><li>AI driven persuasion/manipulation;</li><li>AI driven bypassing of platform safeguards;</li><li>AI-enabled mass profiling of and surveillance of beliefs, affiliations and political participation</li></ul>",
-   K:"High - al AI risks have significant cascading impacts i.e.:<br>1)AI driven persuasion/manipulation can enable mis/disinformation undermining the democratic process;<br>2) AI driven bypassing of platform safeguards can expand exposure to harmful content, including for minors.<br>3) AI-enabled mass profiling can erode civil liberties;",
-   P:"Low",
-   O:"High - rapid ongoing advances in AI capability.",
-   H:"Ongoing. I.e.:<ul><li>Storm-1516 is a Russian state-backed AI-enabled disinformation group that creates and spreads fake news, deep fake videos, and staged whistleblower testimonies to influence foreign elections and undermine Western support for Ukraine</li><li>xAI Grok generated mass non-consensual sexualized and explicit images on X (formerly Twitter), leading to international regulatory probes and bans.</li><li>Allegations against the U.S. department of Homeland Security regarding and ICE around the use of artificial intelligence for social media surveillance with limited democratic oversight</li></ul>"},
-  plot:{l:2.5,s:2.8,lab:"l"}, prep:"crit", fast:true},
-
- {id:"ter", name:"Terrorism", rank:3,
-  lv:{L:"High",S:"High",P:"High",O:"High"},
-  plain:{
-   L:"High",
-   S:"Material support to terrorist groups; online coordination of credible offline threats",
-   K:"Offline attacks coordinated, justified and supported online; social instability",
-   P:"High",
-   O:"High",
-   H:"Frequent:<ul><li>Manchester Synagogue attack: online glorification, antisemitism and incitement</li><li>Southport: surge of violent content; disinformation about the perpetrator used to incite anti-immigration violence</li></ul>"},
-  full:{
-   L:"High",
-   S:"High (substantive support to terrorist organizations or online coordination of offline credible threats)",
-   K:"Offline attacks coordinated, justified and supported online<br>Social instability",
-   P:"High", O:"High",
-   H:'Frequent:<ul><li>Terrorist attack on Manchester Synagogue sparked <a href="https://www.cps.gov.uk/north-west/news/man-who-posted-hateful-antisemitic-message-social-media-following-terrorist-attack" target="_blank" rel="noopener">online</a> glorification, antisemitism and incitement</li><li>The Southport terrorist attack generated a high volume of violent online material. The perpetrator was referred multiple times due to solicitation, consumption and disruption of terrorist material.</li><li>Amplifier: extremist groups utilized the attack to spread disinformation about the identity of the perpetrator and to incite anti immigration violence.</li></ul>'},
-  plot:{l:2.16,s:2.38,lab:"b"}, prep:"ok", fast:true},
-
- {id:"pan", name:"Pandemics", rank:4,
-  lv:{L:"High",S:"High",P:"Lacking",O:"High"},
-  plain:{
-   L:"High",
-   S:"Erodes trust in platforms and regulators; deepens social and political fragmentation",
-   K:"Destabilises society, politics and health systems:<ul><li>Fragmentation towards political fringes</li><li>Loss of trust in political and health authorities</li><li>“Infodemic” cuts vaccine uptake and worsens health impacts</li></ul>",
-   P:"COVID-19 offers lessons, especially on managing misinformation",
-   O:"High",
-   H:"False narratives on social media during COVID-19"},
-  full:{
-   L:"High",
-   S:"High (bearing in mind interactions with other risk categories); can lead to erosion of trust in media platforms as well as regulatory bodies in addition to societal + political fragmentation",
-   K:"Destabilization of societal, political, and health systems:<ul><li>Growing societal fragmentation, with public attitudes moving closer to political fringes</li><li>Loss of trust in political and public health authorities</li><li>“Infodemic” (see, e.g., Caceres et al., 2022) leads to reduced vaccine uptake, which in turn aggravates health impacts of pandemic (incl. overburdened health infrastructure and increased morbidity/mortality)</li></ul>",
-   P:"Lacking (but: potential to learn from COVID-19 pandemic, particularly drawing on evidence regarding interactions with misinformation and its management)",
-   O:"High",
-   H:"Social media used to push false narratives and misinformation during the COVID-19 pandemic"},
-  plot:{l:2.84,s:2.38,lab:"b"}, prep:"crit", fast:true},
-
- {id:"cli", name:"Climate change", rank:5,
+  full:{L:"High", S:"High - three core risks:"+ul(["persuasion/manipulation;","bypassing of platform safeguards;","mass profiling and surveillance"]),
+   K:"High - al AI risks have significant cascading impacts i.e.:"+ul(["mis/disinformation","exposure to harmful content","erode civil liberties;"]),
+   P:"Low", O:"High", H:"Ongoing"},
+  plot:{l:2.5,s:2.8,lab:"l"}, prep:"crit", fast:true}),
+ mk({id:"ter", name:"Terrorism", rank:3,
+  lv:{L:"High",S:"High",K:"High",P:"High",O:"High"},
+  full:{L:"High", S:"High<br>support to terrorist organizations<br>or coordination of credible threats",
+   K:"High - Offline attacks coordinated, justified and supported online<br>Social instability", P:"High", O:"High", H:"Frequent"},
+  plot:{l:2.16,s:2.38,lab:"b"}, prep:"ok", fast:true}),
+ mk({id:"pan", name:"Pandemics", rank:4,
+  lv:{L:"High",S:"High",K:"High",P:"Low",O:"High"},
+  full:{L:"High", S:"High<br>can lead to erosion of trust in media platforms<br>political fragmentation",
+   K:"High –<br>Destabilization of societal, political, and health systems", P:"Low", O:"High", H:"Ongoing"},
+  plot:{l:2.84,s:2.38,lab:"b"}, prep:"crit", fast:true}),
+ mk({id:"cli", name:"Climate change", rank:5,
   lv:{L:"High",S:"Low–Med",K:"Medium",P:"Low",O:"Low"},
-  plain:{
-   L:"High",
-   S:"Social media shapes how the public understands climate change; evidence of policy impact is limited",
-   K:"Poor public understanding; spread of mis/disinformation",
-   P:"Low",
-   O:"Low",
-   H:"Ongoing, e.g. misinformation after Hurricane Helene"},
-  full:{
-   L:"High",
-   S:"Low - Medium -<ul><li>Social media narratives shape how climate change is understood by society, and in turn may (but there is limited scientific evidence) impact climate policy outcomes.</li></ul>",
-   K:"Medium - Risk that climate change risk is not well understood by the public; or risk of dis/misinformation spreading.",
-   P:"Low", O:"Low",
-   H:"Ongoing. I.e. misinformation following hurricane Helene."},
-  plot:{l:2.5,s:1,range:[.5,1.5],lab:"l"}, prep:"crit", fast:false},
-
- {id:"sol", name:"Solar flares", rank:6,
-  lv:{L:"Low",S:"High",P:"Medium",O:"High"},
-  plain:{
-   L:"For extreme events; ordinary space weather is more frequent",
-   S:"In extreme cases: power, telecoms and connectivity disrupted",
-   K:"Lost communications and emergency information; hits the economy, transport and critical infrastructure",
-   P:"UK forecasting and contingency plans; platform resilience uncertain",
-   O:"Rapid disruption, though storms may give warning",
-   H:"Carrington (1859), Quebec blackout (1989), major storm (2024); no precedent for mass platform failure"},
-  full:{
-   L:"Low for extreme platform-disrupting events; ordinary space-weather events are more frequent",
-   S:"High in extreme scenarios — disruption of power, telecommunications and digital connectivity",
-   K:"Loss of communication channels, emergency information disruption, economic activity, transport and critical national infrastructure",
-   P:"Medium — UK space-weather forecasting and contingency arrangements; uncertain resilience across platform dependencies",
-   O:"High — potential for rapid disruption, although geomagnetic storms may offer warning time",
-   H:"Carrington Event (1859); Quebec blackout (1989); major geomagnetic storm (2024). No established precedent for simultaneous failure of very large social media platforms"},
-  plot:{l:.5,s:2.5,lab:"r"}, prep:"warn", fast:true},
-
- {id:"env", name:"Environmental collapse", rank:7, excluded:true,
-  lv:{L:"Medium",S:"Med–High",P:"Low–Med",O:"Low–Med"},
-  plain:{
-   L:"Uncertain: degradation likely; platform-driven impacts hard to predict",
-   S:"Via resource insecurity, social instability and manipulated environmental narratives",
-   K:"Food security, migration, geopolitical tension, public disorder, pressure on government",
-   P:"Monitoring exists; little preparation for platform-amplified effects",
-   O:"Gradual, but tipping points can be sudden",
-   H:"Ongoing degradation; little evidence of security crises driven by social media"},
-  full:{
-   L:"Medium/Uncertain — continuing degradation likely, but major platform-mediated impacts less predictable",
-   S:"Medium–High — indirect consequences through resource insecurity, social instability and manipulation of environmental narratives",
-   K:"Food security, migration, geopolitical tensions, public disorder and pressure on government institutions",
-   P:"Low–Medium — environmental monitoring exists; limited preparation for platform-amplified consequences",
-   O:"Low–Medium — generally gradual, with potentially sudden ecological tipping points or related crises",
-   H:"Ongoing biodiversity and ecosystem degradation; limited historical evidence of discrete national-security crises attributable to social media amplification"},
-  plot:{l:1.5,s:2,range:[1.5,2.5],lab:"l"}, prep:"crit", fast:false}
+  full:{L:"High", S:"Low - Medium -<br>Social media narratives shape how climate change is understood by society",
+   K:"Medium –<br>risk is not well understood by the public;", P:"Low", O:"Low", H:"Ongoing"},
+  plot:{l:2.5,s:1,range:[.5,1.5],lab:"l"}, prep:"crit", fast:false}),
+ mk({id:"sol", name:"Solar flares", rank:6,
+  lv:{L:"Low",S:"High",K:"High",P:"Medium",O:"High"},
+  full:{L:"Low", S:"High (in extreme scenarios)", K:"High-<br>Mass disruption", P:"Medium", O:"High", H:"Rare"},
+  plot:{l:.5,s:2.5,lab:"r"}, prep:"warn", fast:true}),
+ mk({id:"env", name:"Environmental collapse", rank:7, excluded:true,
+  lv:{L:"Medium",S:"Med–High",K:"High",P:"Low–Med",O:"Low–Med"},
+  full:{L:"Medium/Uncertain", S:"Medium/High<br>indirect consequences through resource insecurity",
+   K:"High-<br>Food security, migration, geopolitical tensions,", P:"Low/medium", O:"Low–Medium", H:"Ongoing"},
+  plot:{l:1.5,s:2,range:[1.5,2.5],lab:"l"}, prep:"crit", fast:false})
 ];
-// Interdependencies column, as scored in the table.
 // Interdependencies column, directed: a = the risk whose row gives the score, b = the risk it names.
 const E = [
- {a:"ai",b:"ter",w:3},
- {a:"ai",b:"mis",w:5},
- {a:"ter",b:"ai",w:2},
- {a:"ter",b:"mis",w:4},
+ {a:"ai",b:"ter",w:3},{a:"ai",b:"mis",w:5},
+ {a:"ter",b:"ai",w:3},{a:"ter",b:"mis",w:4},
+ {a:"mis",b:"ai",w:5},{a:"mis",b:"ter",w:3},
  {a:"cli",b:"mis",w:3},
- {a:"pan",b:"mis",w:5},
- {a:"pan",b:"cli",w:3,note:"e.g. increased risk of zoonotic spillovers"}
+ {a:"pan",b:"mis",w:5},{a:"pan",b:"cli",w:3,note:"e.g., increased risk of zoonotic spillovers"},
+ {a:"env",b:"mis",w:2},
+ {a:"sol",b:"env",w:1}
 ];
-const SHORT={'mis': {'K': 'Climate risk', 'H': null}, 'ai': {'K': 'Democracy, harmful content, civil liberties', 'H': 'Ongoing'}, 'ter': {'K': 'Offline attacks; social instability', 'H': 'Frequent'}, 'pan': {'K': 'Social, political and health systems', 'H': 'Once (COVID-19)'}, 'cli': {'K': 'Public understanding; misinformation', 'H': 'Ongoing'}, 'sol': {'K': 'Communications, economy, infrastructure', 'H': 'Rare'}, 'env': {'K': 'Food, migration, public disorder', 'H': 'Ongoing'}};
+const SHORT={mis:{K:"Climate risk; terrorist propaganda",H:"Ongoing"},
+ ai:{K:"Mis/disinformation; exposure to harmful content; erode civil liberties",H:"Ongoing"},
+ ter:{K:"Offline attacks coordinated, justified and supported online; social instability",H:"Frequent"},
+ pan:{K:"Destabilization of societal, political, and health systems",H:"Ongoing"},
+ cli:{K:"Risk is not well understood by the public",H:"Ongoing"},
+ sol:{K:"Mass disruption",H:"Rare"},
+ env:{K:"Food security, migration, geopolitical tensions",H:"Ongoing"}};
 const AMP=new Set(["mis","ai"]);
 R.forEach(r=>r.layer=AMP.has(r.id)?"amp":"haz");
 const LAYERS=[["amp","Amplifiers","carry and intensify other risks on platforms"],["haz","Hazards","events and trends that platforms are exposed to"]];
@@ -410,16 +330,20 @@ function net(){
 
 function linkLines(r,withNote,short){
   const nm=id=>short&&id==="mis"?"Mis/disinformation":byId[id].name;
-  const out=E.filter(e=>e.a===r.id).map(e=>`<span class="ln"><span class="dir">→</span> ${nm(e.b)} <b class="mono">${e.w}</b>${withNote&&e.note?` <span style="color:var(--muted)">(${e.note})</span>`:""}</span>`);
-  const inn=E.filter(e=>e.b===r.id).map(e=>`<span class="ln"><span class="dir">←</span> ${nm(e.a)} <b class="mono">${e.w}</b>${withNote&&e.note?` <span style="color:var(--muted)">(${e.note})</span>`:""}</span>`);
-  return out.concat(inn);
+  const partners=[];E.forEach(e=>{const o=e.a===r.id?e.b:e.b===r.id?e.a:null;if(o&&!partners.includes(o))partners.push(o)});
+  return partners.map(o=>{
+    const out=E.find(e=>e.a===r.id&&e.b===o), inn=E.find(e=>e.a===o&&e.b===r.id);
+    const note=withNote&&((out&&out.note)||(inn&&inn.note));
+    return `<span class="ln">${nm(o)} ${out?`<span class="dir">→</span><b class="mono">${out.w}</b>`:""}${out&&inn?" ":""}${inn?`<span class="dir">←</span><b class="mono">${inn.w}</b>`:""}${note?` <span style="color:var(--muted)">(${note})</span>`:""}</span>`;
+  });
 }
 
 function table(){
   const t=document.getElementById("tbl");
   const cell=(r,f,inv)=>{
     if(mode==="plain"){
-      if(f==="K"||f==="H"){const v=SHORT[r.id]&&SHORT[r.id][f]; return v?`<td>${v}</td>`:`<td class="empty">—</td>`;}
+      if(f==="K"){return `<td><span class="${lvlClass(r.lv.K,false)}">${r.lv.K}</span><br>${SHORT[r.id].K}</td>`;}
+      if(f==="H"){const v=SHORT[r.id]&&SHORT[r.id].H; return v?`<td>${v}</td>`:`<td class="empty">—</td>`;}
       return r.lv[f]?`<td><span class="${lvlClass(r.lv[f],inv)}">${r.lv[f]}</span></td>`:`<td class="empty">—</td>`;
     }
     const v=rated(r,f,inv);return v?`<td>${v}</td>`:`<td class="empty">—</td>`};
@@ -436,7 +360,8 @@ function table(){
 function cardVal(r,f){
   const inv=f==="P";
   if(mode!=="plain") return rated(r,f,inv);
-  if(f==="K"||f==="H") return (SHORT[r.id]&&SHORT[r.id][f])||"";
+  if(f==="K") return `<span class="${lvlClass(r.lv.K,false)}">${r.lv.K}</span><br>${SHORT[r.id].K}`;
+  if(f==="H") return (SHORT[r.id]&&SHORT[r.id].H)||"";
   return r.lv[f]?`<span class="${lvlClass(r.lv[f],inv)}">${r.lv[f]}</span>`:"";
 }
 function detail(){
